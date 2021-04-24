@@ -1,0 +1,175 @@
+<html>
+<head>
+</head>
+<body id="chart">
+
+
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="https://d3js.org/d3-time.v2.min.js"></script>
+  <script src="https://d3js.org/d3-time-format.v3.min.js"></script>
+
+  <script>
+
+
+  var width = 400;
+  var height = 60;
+  var marginx = 0;
+  var marginy = 15;
+
+  var gdp = [{"mails":11,"date":"20210326"},
+  {"mails":123,"date":"20210402"},
+  {"mails":4,"date":"20210409"},
+  {"mails":11,"date":"20210416"},
+  {"mails":1,"date":"20210423"},
+  {"mails":2,"date":"20210430"},
+  {"mails":12,"date":"20210507"},
+  {"mails":14,"date":"20210514"},
+  {"mails":0,"date":"20210521"},
+  {"mails":0,"date":"20210528"},
+  {"mails":8,"date":"20210604"},
+  {"mails":3,"date":"20210611"},
+  ];
+  var gdpnew = [{"20210326":11},
+  {"20210402":13},
+  {"20210409":4},
+  {"20210416":11},
+  {"20210423":1},
+  {"20210430":2},
+  {"20210507":12},
+  {"20210514":14},
+  {"20210521":9},
+  {"20210528":0},
+  {"20210604":8},
+  {"20210611":3},
+  ];
+  var datemin = d3.min(gdp, function(d){return d.mails})
+  var datemax = d3.max(gdp, function(d){return d.mails})
+  var extentmails = d3.extent(gdp, function(d){return d.mails;})
+  var extentdate = d3.extent(gdp,function(d){return d3.time.format("%Y%m%d").parse(d.date);})
+
+  var svg = d3.select("#chart")
+            .append("svg")
+            .attr("id","x")
+            .attr("width",width)
+            .attr("height",height);
+
+
+
+  var xScale = d3.time.scale()
+              .domain(extentdate)
+              .nice()
+              .range([marginx,width-12]);
+
+  var yScale =  d3.scale.linear()
+              .domain(extentmails)
+              .range([height-7,marginy]);
+
+  var line = d3.svg.line()
+            .x(function(d){
+              return xScale(d3.time.format("%Y%m%d").parse(d.date));})
+            .y(function(d){return yScale(d.mails)})
+
+  var xaxis = d3.svg.axis()
+              .scale(xScale)
+              .tickPadding(0)
+              .orient("bottom")
+
+              .tickFormat(function(d){
+                return d3.time.format("%m/%d")(d); })
+
+              // .ticks(d3.time.friday,1)
+              .tickSize(0)
+             svg.append("g")
+              .attr("fill","#8c91a1")
+
+              .attr("class","xaxis")
+              .call(xaxis)
+
+function xgridaxis() {
+  return d3.svg.axis()
+    .scale(xScale)
+    .orient("bottom")
+    .tickFormat(function(d){
+      return d.name;
+    })
+
+}
+                      svg.append("g")
+                        .attr("stroke-width",1)
+                        .attr("class","xgrid")
+                        .attr("stroke","#dde0eb")
+                        .attr("transform", "translate(0,"+ height +")")
+                        .call(xgridaxis()
+                              .tickSize(-height+12, 0, 0)
+
+                              )
+                        .selectAll(".tick line")
+                        .attr("stroke-dasharray", "4 4");
+                        d3.select('.xaxis .tick:first-child').remove()
+                        d3.select('.xgrid .tick:first-child').remove()
+
+      var g = svg.append("g");
+              g.selectAll("rect")
+               .data(gdp).enter().append("rect")
+               .attr("rx",6)
+               .attr("ry",6)
+               .attr("width",20)
+               .attr("height",12)
+               .attr("stroke-linecap","round")
+               .attr("stroke-width",2)
+               .attr("fill","#09c9b2")
+               .attr("x",function(d,i){
+                 return xScale(d3.time.format("%Y%m%d").parse(d.date));
+               })
+               .attr("y",function(d,i){
+                 return yScale(d.mails)-6;
+               });
+
+              // line
+
+                 g.append("path")
+                 .attr("d",line(gdp))
+                 .attr("fill","none")
+                 .attr("stroke","#09c9b2")
+                 .attr("stroke-width",2);
+
+                // add the number of mails
+                g.selectAll("text")
+                 .data(gdp).enter().append("text")
+                 .text(function(d){ return d.mails})
+                 .attr("font-size","10px")
+                 .attr("text-anchor","middle")
+                 .attr("fill","#ffffff")
+                 .attr("x",function(d,i){
+                  return xScale(d3.time.format("%Y%m%d").parse(d.date))+10;
+                 })
+                 .attr("y",function(d,i){
+                   return yScale(d.mails)+3;
+                 });
+
+              // add the meetings y label
+              svg.append("g")
+                 .append("text")
+                 .text("MEETINGS")
+                 .attr("fill","#8c91a1")
+                 .attr("font-size","10px")
+                 .attr("x",0)
+                 .attr("y",height)
+                 .attr("transform","rotate(-90)")
+                 .attr("dx",-57)
+                 .attr("dy",-50);
+
+
+
+
+
+  </script>
+</body>
+<style>
+.xaxis{
+  font-size: 10px;
+  font-weight: bold;
+  color:#8c91a1;
+}
+</style>
+</html>
